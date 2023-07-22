@@ -1,3 +1,4 @@
 ﻿  basic_shark.c
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(160,29): warning C4101: 'buf6': unreferenced local variable
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(160,7): warning C4101: 'buf': unreferenced local variable
   basic_shark.vcxproj -> C:\Users\tingmon\source\repos\basic_shark\x64\Debug\basic_shark.exe
