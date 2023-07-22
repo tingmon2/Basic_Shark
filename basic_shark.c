@@ -11,7 +11,12 @@
 #include <time.h>
 #ifdef _WIN32
 #include <tchar.h>
+
 #include "basic_shark.h"
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "ws2_32")
+
 BOOL LoadNpcapDlls()
 {
 	_TCHAR npcap_dir[512];
@@ -141,9 +146,19 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 		return;
 	ether_header* pEther = (ether_header*)pkt_data;
 	// print hex value MAC address
-	printf("src: %02X-%02X-%02X-%02X-%02X-%02X -> dst: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
-		pEther->src[0], pEther->src[1], pEther->src[2], pEther->src[3], pEther->src[4], pEther->src[5],
-		pEther->dst[0], pEther->dst[1], pEther->dst[2], pEther->dst[3], pEther->dst[4], pEther->dst[5],
+	// https://en.wikipedia.org/wiki/EtherType
+	printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
+		pEther->src_mac[0], pEther->src_mac[1], pEther->src_mac[2], pEther->src_mac[3], 
+		pEther->src_mac[4], pEther->src_mac[5],
+		pEther->dst_mac[0], pEther->dst_mac[1], pEther->dst_mac[2], pEther->dst_mac[3], 
+		pEther->dst_mac[4], pEther->dst_mac[5],
 		pEther->type);
+
+	// print IP address
+	// https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Packet_structure
+	// skip 64 bit of ipv4 header
+	char buf[INET_ADDRSTRLEN], buf6[INET6_ADDRSTRLEN];
+	printf("src IP: %s ->", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 12), buf, sizeof(buf)));
+	printf(" dst IP: %s\n\n", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 16), buf, sizeof(buf)));
 
 }
