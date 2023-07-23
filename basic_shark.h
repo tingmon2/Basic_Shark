@@ -1,5 +1,4 @@
 #pragma once
-
 // customize the auto alignment -> align struct member by 1 byte
 // why? size of the stuct must be equal as Ethernet Header size. Otherwise, packet info we be tangled
 #pragma pack(push, 1) 

@@ -13,6 +13,7 @@
 #include <tchar.h>
 
 #include "basic_shark.h"
+#include "decoder.h"
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32")
@@ -147,20 +148,30 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 	frame_data* pFrame = (frame_data*)pkt_data;
 	// print hex value MAC address
 	// https://en.wikipedia.org/wiki/EtherType
-	printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
-		pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3], 
-		pFrame->src_mac[4], pFrame->src_mac[5],
-		pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3], 
-		pFrame->dst_mac[4], pFrame->dst_mac[5],
-		pFrame->type);
+	if (pFrame->type == (short)0x0008) // 0x0800 - Internet Protocol version 4 (IPv4)
+	{
+		printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
+			pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3],
+			pFrame->src_mac[4], pFrame->src_mac[5],
+			pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3],
+			pFrame->dst_mac[4], pFrame->dst_mac[5],
+			pFrame->type);
 
-	// print IP address
-	// https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Packet_structure
-	// skip 64 bit of ipv4 header
-	char buf[INET_ADDRSTRLEN], buf6[INET6_ADDRSTRLEN];
-	//printf("src IP: %s ->", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 12), buf, sizeof(buf)));
-	//printf(" dst IP: %s\n\n", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 16), buf, sizeof(buf)));
-	printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n", 
-		pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
-		pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
+		// print IP address
+		// https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Packet_structure
+		// skip 64 bit of ipv4 header
+		char buf[INET_ADDRSTRLEN], buf6[INET6_ADDRSTRLEN];
+		//printf("src IP: %s ->", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 12), buf, sizeof(buf)));
+		//printf(" dst IP: %s\n\n", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 16), buf, sizeof(buf)));
+		unsigned char version_ihl = pFrame->version_ihl[0];
+		//unsigned char ihl = version_ihl & 0x0F; // 0000 0101
+		//unsigned char version = version_ihl & 0xF0; //  0100 0000
+		//printf("version: %X, ihl: %X\n", version>>4, ihl);
+		printf("version: %X, ihl: %X\n", version_ihl >> 4, version_ihl & 0x0F);
+		short packet_size = readShort(pFrame->length);
+		printf("packet size: %d bytes\n", packet_size);
+		printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n",
+			pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
+			pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
+	}
 }

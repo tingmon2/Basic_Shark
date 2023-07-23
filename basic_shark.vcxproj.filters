@@ -23,5 +23,8 @@
     <ClInclude Include="basic_shark.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="decoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
