@@ -14,6 +14,7 @@
 
 #include "basic_shark.h"
 #include "decoder.h"
+#include <math.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32")
@@ -43,6 +44,26 @@ char* switchProtocol(char protocol)
 	default:
 		return "Other";
 		break;
+	}
+}
+
+BOOL isPshFlag(unsigned char tcp_flag)
+{
+	for (int i = 1; i < 8; i++)
+	{
+		char twopow = pow(2, i);
+		//if (tcp_flag & a == PSH)
+		//{
+		//	return TRUE;
+		//}
+		switch (tcp_flag & twopow)
+		{
+		case PSH:
+			return TRUE;
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -166,10 +187,27 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 	
 	if (header->len < 14) // it can't be and shouldn't be happen
 		return;
-	int asdf = readInt(pkt_data);
-	if (asdf == 2) // loopback
+	int isLoopback = readInt(pkt_data);
+	if (isLoopback == 33554432) // loopback - sniff my message!
 	{
-
+		tcp_header* tcpHeader = (tcp_header*)pkt_data;
+		unsigned char protocol = readByte(tcpHeader->protocol[0]);
+		if (protocol == 6)
+		{
+			int src_port = readShort(tcpHeader->src_port); 
+			int dst_port = readShort(tcpHeader->dst_port);
+			if (src_port == 25000 || dst_port == 25000)
+			{
+				printf("asdf\n");
+				// only flag PSH
+				unsigned char tcp_flag = readByte(*tcpHeader->tcp_flag);
+				if (isPshFlag(tcp_flag))
+				{
+					printf("qwer\n\n");
+					// print message here
+				}
+			}
+		}
 	}
 	else
 	{
@@ -184,9 +222,9 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 				pFrame->type);
 
 			// ip version and protocol
-			unsigned char version_ihl = readByte(pFrame->version_ihl[0]);
-			unsigned char protocol = readByte(pFrame->protocol[0]);
-			char* strBuffer[10] = { 10 };
+			unsigned char version_ihl = readByte(*pFrame->version_ihl);
+			unsigned char protocol = readByte(*pFrame->protocol);
+			char* strBuffer[10] = { 0 };
 			strcpy_s(strBuffer, sizeof(strBuffer), switchProtocol(protocol));
 			printf("version: %X, ihl: %X, protocol: %d(%s)\n", version_ihl >> 4, version_ihl & 0x0F, protocol, strBuffer);
 

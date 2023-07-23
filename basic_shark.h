@@ -1,21 +1,6 @@
 #pragma once
 // #pragma pack(push, 1) -> pre-processor customize the auto alignment -> align struct member by 1 byte
 // why? size of the stuct must be equal as Ethernet Header size. Otherwise, packet info we be tangled
-// https://en.wikipedia.org/wiki/Transmission_Control_Protocol
-#pragma pack(push, 1)
-typedef struct tcp_header { 
-	unsigned char src_port[2];
-	unsigned char dst_port[2];
-	unsigned char seq_num[4];
-	unsigned char ack_num[4];
-	unsigned char offset_reserved[1];
-	unsigned char flag[1];
-	unsigned char window_size[2];
-	unsigned char checksum[2];
-	unsigned char urgent_pointer[2];
-} tcp_header;
-#pragma pack(pop)
-
 // https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Packet_structure
 #pragma pack(push, 1) 
 typedef struct ip_header {
@@ -26,7 +11,7 @@ typedef struct ip_header {
 	unsigned char flag_offset[2];
 	unsigned char ttl[1];
 	unsigned char protocol[1];
-	unsigned char checksum[2];
+	unsigned char ip_checksum[2];
 	unsigned char src_ip[4];
 	unsigned char dst_ip[4];
 } ip_header;
@@ -61,5 +46,21 @@ typedef struct loop_data {
 } loop_data;
 #pragma pack(pop)
 
+// https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+#pragma pack(push, 1)
+typedef struct tcp_header {
+	struct loop_data;
+	unsigned char wth[2]; // wth
+	unsigned char src_port[2];
+	unsigned char dst_port[2];
+	unsigned char seq_num[4];
+	unsigned char ack_num[3]; // ack_num[4]; :(
+	//unsigned char offset_reserved[1]; // wtf
+	unsigned char tcp_flag[1];
+	unsigned char window_size[2];
+	unsigned char tcp_checksum[2];
+	unsigned char urgent_pointer[2];
+} tcp_header;
+#pragma pack(pop)
 
 
