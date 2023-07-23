@@ -18,6 +18,34 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32")
 
+char* switchProtocol(char protocol)
+{
+	switch ((int) protocol)
+	{
+	case 1:
+		return "ICMP";
+		break;
+	case 2:
+		return "IGMP";
+		break;
+	case 6:
+		return "TCP";
+		break;
+	case 9:
+		return "IGP";
+		break;
+	case 17:
+		return "UDP";
+		break;
+	case 18:
+		return "MUX";
+		break;
+	default:
+		return "Other";
+		break;
+	}
+}
+
 BOOL LoadNpcapDlls()
 {
 	_TCHAR npcap_dir[512];
@@ -135,43 +163,41 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 	 */
 	(VOID)(param);
 	(VOID)(pkt_data);
-
-	/* convert the timestamp to readable format */
-	local_tv_sec = header->ts.tv_sec;
-	ltime = localtime(&local_tv_sec);
-	strftime(timestr, sizeof timestr, "%H:%M:%S", ltime);
-
-	// printf("%s,%.6d len:%d\n", timestr, header->ts.tv_usec, header->len);
 	
 	if (header->len < 14) // it can't be and shouldn't be happen
 		return;
-	frame_data* pFrame = (frame_data*)pkt_data;
-	// print hex value MAC address
-	// https://en.wikipedia.org/wiki/EtherType
-	if (pFrame->type == (short)0x0008) // 0x0800 - Internet Protocol version 4 (IPv4)
+	int asdf = readInt(pkt_data);
+	if (asdf == 2) // loopback
 	{
-		printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
-			pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3],
-			pFrame->src_mac[4], pFrame->src_mac[5],
-			pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3],
-			pFrame->dst_mac[4], pFrame->dst_mac[5],
-			pFrame->type);
 
-		// print IP address
-		// https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Packet_structure
-		// skip 64 bit of ipv4 header
-		char buf[INET_ADDRSTRLEN], buf6[INET6_ADDRSTRLEN];
-		//printf("src IP: %s ->", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 12), buf, sizeof(buf)));
-		//printf(" dst IP: %s\n\n", inet_ntop(AF_INET, (IN_ADDR*)(pkt_data + sizeof(ether_header) + 16), buf, sizeof(buf)));
-		unsigned char version_ihl = pFrame->version_ihl[0];
-		//unsigned char ihl = version_ihl & 0x0F; // 0000 0101
-		//unsigned char version = version_ihl & 0xF0; //  0100 0000
-		//printf("version: %X, ihl: %X\n", version>>4, ihl);
-		printf("version: %X, ihl: %X\n", version_ihl >> 4, version_ihl & 0x0F);
-		short packet_size = readShort(pFrame->length);
-		printf("packet size: %d bytes\n", packet_size);
-		printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n",
-			pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
-			pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
+	}
+	else
+	{
+		frame_data* pFrame = (frame_data*)pkt_data;
+		if (pFrame->type == (short)0x0008) // 0x0800 - Internet Protocol version 4 (IPv4)
+		{
+			printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
+				pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3],
+				pFrame->src_mac[4], pFrame->src_mac[5],
+				pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3],
+				pFrame->dst_mac[4], pFrame->dst_mac[5],
+				pFrame->type);
+
+			// ip version and protocol
+			unsigned char version_ihl = readByte(pFrame->version_ihl[0]);
+			unsigned char protocol = readByte(pFrame->protocol[0]);
+			char* strBuffer[10] = { 10 };
+			strcpy_s(strBuffer, sizeof(strBuffer), switchProtocol(protocol));
+			printf("version: %X, ihl: %X, protocol: %d(%s)\n", version_ihl >> 4, version_ihl & 0x0F, protocol, strBuffer);
+
+			// pakcet size
+			short packet_size = readShort(pFrame->length);
+			printf("packet size: %d bytes\n", packet_size);
+
+			// ip address
+			printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n",
+				pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
+				pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
+		}
 	}
 }
