@@ -48,20 +48,20 @@ typedef struct loop_data {
 
 // https://en.wikipedia.org/wiki/Transmission_Control_Protocol
 #pragma pack(push, 1)
-typedef struct tcp_header {
+typedef struct loop_tcp_header {
 	struct loop_data;
-	unsigned char wth[2]; // wth
+	// unsigned char wth[2]; // wth
 	unsigned char src_port[2]; // ok
 	unsigned char dst_port[2]; // x
 	unsigned char seq_num[4]; // x
-	unsigned char ack_num[3]; // x
-	//unsigned char offset_reserved[1]; // wtf
+	unsigned char ack_num[4]; // x
+	unsigned char offset_reserved[1]; // wtf
 	unsigned char tcp_flag[1]; // ok
 	unsigned char window_size[2]; // ok
 	unsigned char tcp_checksum[2]; //
 	unsigned char urgent_pointer[2]; // ok
 	unsigned char startOfTheEnd[1]; // ok
-} tcp_header;
+} loop_tcp_header;
 #pragma pack(pop)
 
 

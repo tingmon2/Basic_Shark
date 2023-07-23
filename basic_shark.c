@@ -47,6 +47,7 @@ char* switchProtocol(char protocol)
 	}
 }
 
+// get binary value of each bit position to see which flag is true
 BOOL isPshFlag(unsigned char tcp_flag)
 {
 	for (int i = 1; i < 8; i++)
@@ -54,8 +55,8 @@ BOOL isPshFlag(unsigned char tcp_flag)
 		char twopow = pow(2, i);
 		switch (tcp_flag & twopow)
 		{
-		case ACK:
-			break;
+		//case ACK:
+		//	break;
 		case PSH:
 			return TRUE;
 			break;
@@ -63,9 +64,10 @@ BOOL isPshFlag(unsigned char tcp_flag)
 			break;
 		}
 	}
+	return FALSE;
 }
 
-int loopbackSniffer(tcp_header* tcpHeader)
+int loopbackSniffer(loop_tcp_header* tcpHeader)
 {
 	unsigned char protocol = readByte(tcpHeader->protocol[0]);
 	if (protocol == 6)
@@ -73,17 +75,17 @@ int loopbackSniffer(tcp_header* tcpHeader)
 		int src_port = readShort(tcpHeader->src_port);
 		int dst_port = readShort(tcpHeader->dst_port);
 		unsigned char tcp_flag = readByte(*tcpHeader->tcp_flag);
-		printf("src_port: %d, dst_port: %d, flag: %02X\n", src_port, dst_port, tcp_flag);
-		printf("window_size: %d, checksum: %02X%02X, urgent_pointer: %d\n", 
-			readShort(tcpHeader->window_size), 
-			tcpHeader->tcp_checksum[0], tcpHeader->tcp_checksum[1], 
-			readShort(tcpHeader->urgent_pointer));
-		printf("sequence_number: %d\n\n", readInt(tcpHeader->seq_num));
 		if (src_port == 25000 || dst_port == 25000)
 		{
 			// only flag PSH
 			if (isPshFlag(tcp_flag))
 			{
+				printf("src_port: %d, dst_port: %d, flag: %02X\n", src_port, dst_port, tcp_flag);
+				printf("window_size: %d, checksum: %02X%02X, urgent_pointer: %d\n",
+					readShort(tcpHeader->window_size),
+					tcpHeader->tcp_checksum[0], tcpHeader->tcp_checksum[1],
+					readShort(tcpHeader->urgent_pointer));
+				// printf("sequence_number: %d\n\n", readInt(tcpHeader->seq_num));
 				if (src_port != 25000)
 				{
 					printf("from client: ");
@@ -102,7 +104,6 @@ int loopbackSniffer(tcp_header* tcpHeader)
 					else
 					{
 						printf("%c", *(tcpHeader->startOfTheEnd + i));
-
 					}
 				}
 			}
@@ -233,7 +234,7 @@ int main()
 		return -1;
 	}
 
-	printf("\nlistening on %s...\n", d->description);
+	printf("\nlistening on %s...\n\n", d->description);
 
 	/* At this point, we don't need any more the device list. Free it */
 	pcap_freealldevs(alldevs);
@@ -264,7 +265,7 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 	int isLoopback = readInt(pkt_data);
 	if (isLoopback == 33554432) // loopback - sniff my message!
 	{
-		tcp_header* tcpHeader = (tcp_header*)pkt_data;
+		loop_tcp_header* tcpHeader = (loop_tcp_header*)pkt_data;
 		loopbackSniffer(tcpHeader);
 	}
 	else
