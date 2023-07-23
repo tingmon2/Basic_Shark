@@ -19,7 +19,7 @@ short readShort(unsigned char* data)
 {
 	int byte1 = readByte(data[0]);
 	int byte2 = readByte(data[1]);
-	return (short) (byte1 << 8) + byte2;
+	return (unsigned short) (byte1 << 8) + byte2;
 }
 
 int readInt(unsigned char* data)
@@ -28,16 +28,8 @@ int readInt(unsigned char* data)
 	int byte2 = readByte(data[1]); 
 	int byte3 = readByte(data[2]); 
 	int byte4 = readByte(data[3]); 
-	return (byte1 << 24) + (byte2 << 16) + (byte3 << 8) + byte4;
+	return (unsigned int) (byte1 << 24) + (byte2 << 16) + (byte3 << 8) + byte4;
 }
-
-//char* readString(unsigned char* data)
-//{
-//	for (int i = sizeof(data) - 1; i >= 0; i--)
-//	{
-//
-//	}
-//}
 
 long readLong(unsigned char* data)
 {
@@ -50,5 +42,6 @@ long readLong(unsigned char* data)
 	long byte7 = readByte(data[6]);
 	long byte8 = readByte(data[7]);
 
-	return (byte1 << 56) + (byte2 << 48) + (byte3 << 40) + (byte4 << 32) + (byte5 << 24) + (byte6 << 16) + (byte7 << 8) + byte8;
+	return (unsigned long) (byte1 << 56) + (byte2 << 48) + (byte3 << 40) + (byte4 << 32) 
+		+ (byte5 << 24) + (byte6 << 16) + (byte7 << 8) + byte8;
 }

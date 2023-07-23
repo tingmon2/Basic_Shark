@@ -51,16 +51,16 @@ typedef struct loop_data {
 typedef struct tcp_header {
 	struct loop_data;
 	unsigned char wth[2]; // wth
-	unsigned char src_port[2];
-	unsigned char dst_port[2];
-	unsigned char seq_num[4];
-	unsigned char ack_num[3]; // ack_num[4]; :(
+	unsigned char src_port[2]; // ok
+	unsigned char dst_port[2]; // x
+	unsigned char seq_num[4]; // x
+	unsigned char ack_num[3]; // x
 	//unsigned char offset_reserved[1]; // wtf
-	unsigned char tcp_flag[1];
-	unsigned char window_size[2];
-	unsigned char tcp_checksum[2];
-	unsigned char urgent_pointer[2];
-	unsigned char startOfTheEnd[1];
+	unsigned char tcp_flag[1]; // ok
+	unsigned char window_size[2]; // ok
+	unsigned char tcp_checksum[2]; //
+	unsigned char urgent_pointer[2]; // ok
+	unsigned char startOfTheEnd[1]; // ok
 } tcp_header;
 #pragma pack(pop)
 

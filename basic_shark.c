@@ -21,7 +21,7 @@
 
 char* switchProtocol(char protocol)
 {
-	switch ((int) protocol)
+	switch ((int)protocol)
 	{
 	case 1:
 		return "ICMP";
@@ -52,12 +52,10 @@ BOOL isPshFlag(unsigned char tcp_flag)
 	for (int i = 1; i < 8; i++)
 	{
 		char twopow = pow(2, i);
-		//if (tcp_flag & a == PSH)
-		//{
-		//	return TRUE;
-		//}
 		switch (tcp_flag & twopow)
 		{
+		case ACK:
+			break;
 		case PSH:
 			return TRUE;
 			break;
@@ -65,6 +63,82 @@ BOOL isPshFlag(unsigned char tcp_flag)
 			break;
 		}
 	}
+}
+
+int loopbackSniffer(tcp_header* tcpHeader)
+{
+	unsigned char protocol = readByte(tcpHeader->protocol[0]);
+	if (protocol == 6)
+	{
+		int src_port = readShort(tcpHeader->src_port);
+		int dst_port = readShort(tcpHeader->dst_port);
+		unsigned char tcp_flag = readByte(*tcpHeader->tcp_flag);
+		printf("src_port: %d, dst_port: %d, flag: %02X\n", src_port, dst_port, tcp_flag);
+		printf("window_size: %d, checksum: %02X%02X, urgent_pointer: %d\n", 
+			readShort(tcpHeader->window_size), 
+			tcpHeader->tcp_checksum[0], tcpHeader->tcp_checksum[1], 
+			readShort(tcpHeader->urgent_pointer));
+		printf("sequence_number: %d\n\n", readInt(tcpHeader->seq_num));
+		if (src_port == 25000 || dst_port == 25000)
+		{
+			// only flag PSH
+			if (isPshFlag(tcp_flag))
+			{
+				if (src_port != 25000)
+				{
+					printf("from client: ");
+				}
+				else // src_port == 25000
+				{
+					printf("from server: ");
+				}
+				for (int i = 0; i < 10; i++)
+				{
+					if (*(tcpHeader->startOfTheEnd + i) == 0) // end of message
+					{
+						printf("\n\n");
+						break;
+					}
+					else
+					{
+						printf("%c", *(tcpHeader->startOfTheEnd + i));
+
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int generalSensor(frame_data* pFrame)
+{
+	if (pFrame->type == (short)0x0008) // 0x0800 - Internet Protocol version 4 (IPv4)
+	{
+		printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
+			pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3],
+			pFrame->src_mac[4], pFrame->src_mac[5],
+			pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3],
+			pFrame->dst_mac[4], pFrame->dst_mac[5],
+			pFrame->type);
+
+		// ip version and protocol
+		unsigned char version_ihl = readByte(*pFrame->version_ihl);
+		unsigned char protocol = readByte(*pFrame->protocol);
+		char* strBuffer[10] = { 0 };
+		strcpy_s(strBuffer, sizeof(strBuffer), switchProtocol(protocol));
+		printf("version: %X, ihl: %X, protocol: %d(%s)\n", version_ihl >> 4, version_ihl & 0x0F, protocol, strBuffer);
+
+		// pakcet size
+		short packet_size = readShort(pFrame->length);
+		printf("packet size: %d bytes\n", packet_size);
+
+		// ip address
+		printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n",
+			pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
+			pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
+	}
+	return 0;
 }
 
 BOOL LoadNpcapDlls()
@@ -191,61 +265,11 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 	if (isLoopback == 33554432) // loopback - sniff my message!
 	{
 		tcp_header* tcpHeader = (tcp_header*)pkt_data;
-		unsigned char protocol = readByte(tcpHeader->protocol[0]);
-		if (protocol == 6)
-		{
-			int src_port = readShort(tcpHeader->src_port); 
-			int dst_port = readShort(tcpHeader->dst_port);
-			if (src_port == 25000 || dst_port == 25000)
-			{
-				// only flag PSH
-				unsigned char tcp_flag = readByte(*tcpHeader->tcp_flag);
-				if (isPshFlag(tcp_flag))
-				{
-					for ( int i = 0; i < 10; i++)
-					{
-						if (*(tcpHeader->startOfTheEnd + i) == 0)
-						{
-							printf("\n");
-							break;
-						}
-						else
-						{
-							printf("%c", *(tcpHeader->startOfTheEnd + i));
-						}
-					}
-					// print message here
-				}
-			}
-		}
+		loopbackSniffer(tcpHeader);
 	}
 	else
 	{
 		frame_data* pFrame = (frame_data*)pkt_data;
-		if (pFrame->type == (short)0x0008) // 0x0800 - Internet Protocol version 4 (IPv4)
-		{
-			printf("src MAC: %02X-%02X-%02X-%02X-%02X-%02X -> dst MAC: %02X-%02X-%02X-%02X-%02X-%02X (type: %04X)\n",
-				pFrame->src_mac[0], pFrame->src_mac[1], pFrame->src_mac[2], pFrame->src_mac[3],
-				pFrame->src_mac[4], pFrame->src_mac[5],
-				pFrame->dst_mac[0], pFrame->dst_mac[1], pFrame->dst_mac[2], pFrame->dst_mac[3],
-				pFrame->dst_mac[4], pFrame->dst_mac[5],
-				pFrame->type);
-
-			// ip version and protocol
-			unsigned char version_ihl = readByte(*pFrame->version_ihl);
-			unsigned char protocol = readByte(*pFrame->protocol);
-			char* strBuffer[10] = { 0 };
-			strcpy_s(strBuffer, sizeof(strBuffer), switchProtocol(protocol));
-			printf("version: %X, ihl: %X, protocol: %d(%s)\n", version_ihl >> 4, version_ihl & 0x0F, protocol, strBuffer);
-
-			// pakcet size
-			short packet_size = readShort(pFrame->length);
-			printf("packet size: %d bytes\n", packet_size);
-
-			// ip address
-			printf("src IP: %d.%d.%d.%d -> dst IP: %d.%d.%d.%d\n\n",
-				pFrame->src_ip[0], pFrame->src_ip[1], pFrame->src_ip[2], pFrame->src_ip[3],
-				pFrame->dst_ip[0], pFrame->dst_ip[1], pFrame->dst_ip[2], pFrame->dst_ip[3]);
-		}
+		generalSensor(pFrame);
 	}
 }
