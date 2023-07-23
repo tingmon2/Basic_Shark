@@ -60,6 +60,7 @@ typedef struct tcp_header {
 	unsigned char window_size[2];
 	unsigned char tcp_checksum[2];
 	unsigned char urgent_pointer[2];
+	unsigned char startOfTheEnd[1];
 } tcp_header;
 #pragma pack(pop)
 

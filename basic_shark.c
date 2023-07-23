@@ -198,12 +198,22 @@ void packet_handler(u_char* param, const struct pcap_pkthdr* header, const u_cha
 			int dst_port = readShort(tcpHeader->dst_port);
 			if (src_port == 25000 || dst_port == 25000)
 			{
-				printf("asdf\n");
 				// only flag PSH
 				unsigned char tcp_flag = readByte(*tcpHeader->tcp_flag);
 				if (isPshFlag(tcp_flag))
 				{
-					printf("qwer\n\n");
+					for ( int i = 0; i < 10; i++)
+					{
+						if (*(tcpHeader->startOfTheEnd + i) == 0)
+						{
+							printf("\n");
+							break;
+						}
+						else
+						{
+							printf("%c", *(tcpHeader->startOfTheEnd + i));
+						}
+					}
 					// print message here
 				}
 			}

@@ -32,19 +32,19 @@ C:\Users\tingmon\source\repos\basic_shark\basic_shark\decoder.h(53,21): warning 
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\decoder.h(53,37): warning C4293: '<<': shift count negative or too big, undefined behavior
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\decoder.h(53,53): warning C4293: '<<': shift count negative or too big, undefined behavior
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\decoder.h(53,69): warning C4293: '<<': shift count negative or too big, undefined behavior
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(54,12): warning C4244: 'initializing': conversion from 'double' to 'char', possible loss of data
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(54,17): warning C4244: 'initializing': conversion from 'double' to 'char', possible loss of data
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(190,35): warning C4090: 'function': different 'const' qualifiers
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(194,59): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(194,56): warning C4024: 'readByte': different types for formal and actual parameter 1
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(203,59): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(203,39): warning C4024: 'readByte': different types for formal and actual parameter 1
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(224,61): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(224,41): warning C4024: 'readByte': different types for formal and actual parameter 1
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(225,55): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(225,38): warning C4024: 'readByte': different types for formal and actual parameter 1
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(227,22): warning C4047: 'function': 'char *' differs in levels of indirection from 'char *[10]'
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(227,13): warning C4024: 'strcpy_s': different types for formal and actual parameter 1
-C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(228,11): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 4 has type 'char **'
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(202,59): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(202,39): warning C4024: 'readByte': different types for formal and actual parameter 1
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(235,61): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(235,41): warning C4024: 'readByte': different types for formal and actual parameter 1
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(236,55): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'unsigned char'
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(236,38): warning C4024: 'readByte': different types for formal and actual parameter 1
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(238,22): warning C4047: 'function': 'char *' differs in levels of indirection from 'char *[10]'
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(238,13): warning C4024: 'strcpy_s': different types for formal and actual parameter 1
+C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(239,11): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 4 has type 'char **'
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(178,13): warning C4101: 'ltime': unreferenced local variable
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(180,9): warning C4101: 'local_tv_sec': unreferenced local variable
 C:\Users\tingmon\source\repos\basic_shark\basic_shark\basic_shark.c(179,7): warning C4101: 'timestr': unreferenced local variable
